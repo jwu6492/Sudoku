@@ -1,5 +1,13 @@
 #sudoku solver using the backtracking algorithm assuming 9x9 board
 def valid(board, row, col, num):
+    """
+    This function will validate if the attempted number input at the specific position is correct or not
+    @param board - the inputed 9x9 sudoku board
+    @param row - int row of the attempted number input
+    @param col - int column of the attempted number input
+    @param num - the attempted number input
+    @return true if number placement is valid and false if it is not
+    """
     #check row
     for i in range(0, len(board)):
         if board[row][i] == num:
@@ -19,6 +27,12 @@ def valid(board, row, col, num):
     return True
 
 def find_empty_space(board, pos):
+    """
+    This function will find the next empty space
+    @param board - the inputed 9x9 sudoku board
+    @param pos - list that records the location of the empty space
+    @return true if there is an empty space and false if there is not
+    """
     for i in range(len(board)):
         for j in range(len(board[0])):
             if board[i][j] == 0:
@@ -26,7 +40,13 @@ def find_empty_space(board, pos):
                 pos[1] = j
                 return True
     return False
+
 def solve(board):
+    """
+    This function will implement the backtracking algorithm to solve the sudoku board
+    @param board - the inputted 9x9 sudoku board
+    @return true if the board is solved and false if there is no solution
+    """
     pos = [0,0]
     if not find_empty_space(board, pos):
         return True
@@ -41,7 +61,12 @@ def solve(board):
                 board[row][col] = 0
     #no solution
     return False
+
 def print_board(board):
+    """
+    This function will print the board
+    @param board - the inputted 9x9 sudoku board
+    """
     for i in range(len(board)):
         for j in range(len(board[0])):
             print(board[i][j], end = " ")
