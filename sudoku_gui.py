@@ -34,22 +34,41 @@ class Grid:
             #rows
             pygame.draw.line(self.window, (0, 0, 0), (0, i * space), (self.width, i * space), thickness)
 
-def draw_window(win, board):
+
+class Square:
+    rows = 9
+    cols = 9
+
+    def __init__(self, value, row, col, width, height):
+        self.temp = 0
+        self.value = value
+        self.row = row
+        self.col = col
+        self.width = width
+        self.height = height
+        self.selected = False
+    
+    def set_val(self, val):
+        self.value = val
+    
+    def set_temp(self, val):
+        self.temp = val
+    
+
+def draw_window(win, board, time):
     win.fill((255,255,255))
+    text = pygame.font.SysFont('comicsans', size = 30)
+    time_text = text.render("Time: " + format_time(time), 1, (0,0,0))
+    win.blit(time_text, (540 - 130, 565))
     board.draw()
 
-
-def main():
-    win = pygame.display.set_mode((540,600))
-    pygame.display.set_caption("Sudoku")
-    board = Grid(9, 9, 540, 540, win)
-    run = True
-    while run:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
-        draw_window(win, board)
-        pygame.display.update()
+def format_time(secs):
+    sec = secs % 60
+    min = secs // 60
+    hour = min // 60
+    
+    result = str(hour) + ":" + str(min) + ":" + str(sec)
+    return result
 
 def valid(board, row, col, num):
     #check row
@@ -94,5 +113,18 @@ def solve(board):
                 board[row][col] = 0
     #no solution
     return False
+def main():
+    win = pygame.display.set_mode((540,600))
+    pygame.display.set_caption("Sudoku")
+    board = Grid(9, 9, 540, 540, win)
+    run = True
+    start = time.time()
+    while run:
+        playing_time = round(time.time() - start)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+        draw_window(win, board, playing_time)
+        pygame.display.update()
 main()
 pygame.quit()
