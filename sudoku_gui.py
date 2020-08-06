@@ -59,11 +59,13 @@ class Grid:
         row = self.selected[0]
         col = self.selected[1]
         if self.squares[row][col].value == 0:
+            self.model[row][col] = val
             self.squares[row][col].set_val(val)
             self.update_model()
-            if valid(self.model, row, col, val) and self.solve():
+            if valid(self.model, row, col, val):
                 return True
             else:
+                self.model[row][col] = 0
                 self.squares[row][col].set_val(0)
                 self.squares[row][col].set_temp(0)
                 self.update_model()
@@ -144,8 +146,8 @@ class Square:
     cols = 9
 
     def __init__(self, value, row, col, width, height):
-        self.temp = 0
         self.value = value
+        self.temp = 0
         self.row = row
         self.col = col
         self.width = width
@@ -209,18 +211,18 @@ def format_time(secs):
 def valid(board, row, col, num):
     #check row
     for i in range(0, len(board)):
-        if board[row][i] == num:
+        if board[row][i] == num and col != i:
             return False
     #check column
     for i in range(0, len(board)):
-        if board[i][col] == num:
+        if board[i][col] == num and row != i:
             return False
     #check sub-grid
     row_start = row - row % 3
     col_start = col - col % 3
     for i in range(row_start, row_start + 3):
         for j in range(col_start, col_start + 3):
-            if board[i][j] == num:
+            if board[i][j] == num and row != i and col != j:
                 return False
     #valid attempted number
     return True
