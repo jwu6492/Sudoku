@@ -51,11 +51,13 @@ class Grid:
             return None
     
     def num_guess(self, val):
+        #sets pencil value in sudoku
         row = self.selected[0]
         col = self.selected[1]
         self.squares[row][col].set_temp(val)
 
     def insert(self, val):
+        #checks if entered number is valid or not, if valid it will enter the value
         row = self.selected[0]
         col = self.selected[1]
         if self.squares[row][col].value == 0:
@@ -72,12 +74,20 @@ class Grid:
                 return False
     
     def clear(self):
+        #clears both the penciled value or the actual value
         row = self.selected[0]
         col = self.selected[1]
         self.squares[row][col].set_temp(0)
         self.squares[row][col].set_val(0)
 
+    def clear_board(self):
+        #clears the whole sudoku board
+        for i in range(self.rows):
+            for j in range(self.cols):
+                self.squares[i][j].set_val(0)
+
     def is_complete(self):
+        #checks if board is finished or not
         for i in range(self.rows):
             for j in range(self.cols):
                 if self.squares[i][j].value == 0:
@@ -85,6 +95,7 @@ class Grid:
         return True
 
     def draw(self):
+        #draws the gridlines and the square objects
         space = self.width / 9
         for i in range(self.rows + 1):
             if i % 3 == 0 and i != 0:
@@ -95,12 +106,13 @@ class Grid:
             pygame.draw.line(self.window, (0, 0, 0), (i * space, 0), (i * space, self.width), thickness)
             #rows
             pygame.draw.line(self.window, (0, 0, 0), (0, i * space), (self.width, i * space), thickness)
-        #cubes
+        #squares
         for i in range(self.rows):
             for j in range(self.cols):
                 self.squares[i][j].draw(self.window)
     
     def solve(self):
+        #solves the board
         pos = [0,0]
         if not find_empty_space(self.model, pos):
             return True
@@ -116,6 +128,7 @@ class Grid:
         return False
 
     def visualize_solve(self):
+        #shows the visualization of the backtracking algorithm that solves the sudoku puzzle
         self.update_model()
         pos = [0,0]
         if not find_empty_space(self.model, pos):
@@ -129,7 +142,7 @@ class Grid:
                 self.squares[row][col].tracing(self.window, True)
                 self.update_model()
                 pygame.display.update()
-                pygame.time.delay(100)
+                pygame.time.delay(93)
                 if self.visualize_solve():
                     return True
                 self.model[row][col] = 0
@@ -137,7 +150,7 @@ class Grid:
                 self.squares[row][col].tracing(self.window, False)
                 self.update_model()
                 pygame.display.update()
-                pygame.time.delay(100)
+                pygame.time.delay(93)
         #no solution
         return False       
 
@@ -155,12 +168,15 @@ class Square:
         self.selected = False
     
     def set_val(self, val):
+        #sets the value of a sudoku box
         self.value = val
     
     def set_temp(self, val):
+        #sets the temporary value of a sudoku box (pencil value)
         self.temp = val
     
     def draw(self, window):
+        #draws the temporary value and the actual value in the boxes of the sudoku
         text = pygame.font.SysFont('comicsans', size = 35)
         gap = self.width / 9
         x = self.col * gap
@@ -176,6 +192,7 @@ class Square:
              pygame.draw.rect(window, (0, 0, 255), (x, y, gap, gap), 3)
 
     def tracing(self, window, correct = True):
+        #for the visualization algorithm: green for moving forward and red for moving back
         text = pygame.font.SysFont('comicsans', size = 35)
         gap = self.width / 9
         x = self.col * gap
@@ -191,16 +208,24 @@ class Square:
         else:
             pygame.draw.rect(window, (255, 0, 0), (x, y, gap, gap), 3)
 
-def draw_window(window, board, time, wrong):
+def draw_window(window, board, time, wrong, rect):
     window.fill((255,255,255))
     text = pygame.font.SysFont('comicsans', size = 30)
+    #drawing time
     time_text = text.render("Time: " + format_time(time), 1, (0,0,0))
     window.blit(time_text, (540 - 130, 565))
+    #drawing the X's for number of wrongs
     wrong_text = text.render("X " * wrong, 1, (255, 0, 0))
     window.blit(wrong_text, (10, 565))
+    #drawing clear button
+    clear = text.render("CLEAR", 1, (0, 0, 0))
+    pygame.draw.rect(window, (128, 128, 128), rect, 0)
+    window.blit(clear, rect)
+    #drawing board
     board.draw()
 
 def format_time(secs):
+    #formats the time for how long the game is played
     sec = secs % 60
     min = secs // 60
     hour = min // 60
@@ -228,6 +253,7 @@ def valid(board, row, col, num):
     return True
 
 def find_empty_space(board, pos):
+    #finds the next empty box in the board
     for i in range(len(board)):
         for j in range(len(board[0])):
             if board[i][j] == 0:
@@ -237,12 +263,13 @@ def find_empty_space(board, pos):
     return False
 
 def main():
-    win = pygame.display.set_mode((540,600))
+    screen = pygame.display.set_mode((540,600))
     pygame.display.set_caption("Sudoku")
-    board = Grid(9, 9, 540, 540, win)
+    board = Grid(9, 9, 540, 540, screen)
     run = True
     start = time.time()
     wrong = 0
+    button = pygame.Rect(315, 565, 70, 20)
     while run:
         playing_time = round(time.time() - start)
         for event in pygame.event.get():
@@ -291,10 +318,15 @@ def main():
                 if clicked:
                     board.select(clicked[0], clicked[1])
                     key = None
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if button.collidepoint(mouse_pos):
+                    board.clear_board()
+                    key = None
         if board.selected and key != None:
             board.num_guess(key)
         
-        draw_window(win, board, playing_time, wrong)
+        draw_window(screen, board, playing_time, wrong, button)
         pygame.display.update()
 main()
 pygame.quit()
