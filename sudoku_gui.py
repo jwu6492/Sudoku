@@ -163,7 +163,7 @@ class Grid:
                 self.squares[row][col].tracing(self.window, True)
                 self.update_model()
                 pygame.display.update()
-                pygame.time.delay(93)
+                #pygame.time.delay(93)
                 if self.visualize_solve():
                     return True
                 self.model[row][col] = 0
@@ -171,7 +171,7 @@ class Grid:
                 self.squares[row][col].tracing(self.window, False)
                 self.update_model()
                 pygame.display.update()
-                pygame.time.delay(93)
+                #pygame.time.delay(93)
         #no solution
         return False       
 
