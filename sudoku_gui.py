@@ -87,6 +87,13 @@ class Grid:
                 self.squares[i][j].set_val(0)
                 self.squares[i][j].set_temp(0)
 
+    def replay(self):
+        #resets the board to the original puzzle
+        for i in range(self.rows):
+            for j in range(self.cols):
+                self.squares[i][j].set_val(self.board[i][j])
+                self.update_model()
+
     def is_complete(self):
         #checks if board is finished or not
         for i in range(self.rows):
@@ -229,28 +236,34 @@ class Square:
         else:
             pygame.draw.rect(window, (255, 0, 0), (x, y, gap, gap), 3)
 
-def draw_window(window, board, time, wrong, clear_rect, solve_rect, solution_rect):
+def draw_window(window, board, time, wrong, clear_rect, solve_rect, solution_rect, retry_rect):
     window.fill((255,255,255))
     text = pygame.font.SysFont('comicsans', size = 30)
+    button_text = pygame.font.SysFont('comicsans', size = 22)
+    strikes = pygame.font.SysFont('comicsans', size = 25)
     #drawing time
     time_text = text.render("Time: " + format_time(time), 1, (0,0,0))
     window.blit(time_text, (540 - 115, 590))
     #drawing the X's for number of wrongs
     if wrong > 0:
-        wrong_text = text.render("X " * wrong, 1, (255, 0, 0))
-        window.blit(wrong_text, (10, 590))
+        wrong_text = strikes.render("X " * wrong, 1, (255, 0, 0))
+        window.blit(wrong_text, (10, 591))
     #drawing clear button
-    clear = text.render("CLEAR", 1, (0, 0, 0))
+    clear = button_text.render("CLEAR", 1, (0, 0, 0))
     pygame.draw.rect(window, (128, 128, 128), clear_rect, 0)
     window.blit(clear, clear_rect)
     #drawing solve button
-    solve = text.render("SOLVE", 1, (0, 0, 0))
+    solve = button_text.render("SOLVE", 1, (0, 0, 0))
     pygame.draw.rect(window, (39, 174, 96), solve_rect, 0)
     window.blit(solve, solve_rect)
     #drawing solution button
-    solution = text.render("SOLUTION", 1, (0, 0, 0))
+    solution = button_text.render("SOLUTION", 1, (0, 0, 0))
     pygame.draw.rect(window, (174, 214, 241), solution_rect, 0)
     window.blit(solution, solution_rect)
+    #drawing retry button
+    retry = button_text.render("RETRY",  1, (0, 0, 0))
+    pygame.draw.rect(window, (223, 160, 245), retry_rect, 0)
+    window.blit(retry, retry_rect)
     #drawing board
     board.draw()
 
@@ -299,9 +312,10 @@ def main():
     run = True
     start = time.time()
     wrong = 0
-    clear = pygame.Rect(345, 590, 70, 20)
-    solve = pygame.Rect(150, 590, 70, 20)
-    solution = pygame.Rect(229, 590, 107, 20)
+    clear = pygame.Rect(363, 592, 53, 15)
+    solve = pygame.Rect(217, 592, 51, 15)
+    solution = pygame.Rect(274, 592, 83, 15)
+    retry = pygame.Rect(158.5, 592, 53, 15)
     while run:
         playing_time = round(time.time() - start)
         for event in pygame.event.get():
@@ -338,7 +352,7 @@ def main():
                         else:
                             print('Wrong')
                             wrong += 1
-                            if wrong > 7:
+                            if wrong > 9:
                                 board.show_solution()
                                 wrong = 0
                         key = None
@@ -367,10 +381,15 @@ def main():
                 if solve.collidepoint(mouse_pos):
                     board.visualize_solve()
                     key = None
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if retry.collidepoint(mouse_pos):
+                    board.replay()
+                    key = None
         if board.selected and key != None:
             board.num_guess(key)
         
-        draw_window(screen, board, playing_time, wrong, clear, solve, solution)
+        draw_window(screen, board, playing_time, wrong, clear, solve, solution, retry)
         pygame.display.update()
 main()
 pygame.quit()
