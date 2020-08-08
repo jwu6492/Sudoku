@@ -92,6 +92,7 @@ class Grid:
         for i in range(self.rows):
             for j in range(self.cols):
                 self.squares[i][j].set_val(self.board[i][j])
+                self.squares[i][j].set_temp(0)
                 self.update_model()
 
     def is_complete(self):
