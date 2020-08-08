@@ -12,4 +12,5 @@ Press "REPLAY" to go back to the default sudoku board
 Press "SOLVE" to see the backtracking algorithm visualization that is solving the current sudoku board
 Press "SOLUTION" to see the solution to the current sudoku board
 
-This program can be used to play the game sudoku normally and solve any incomplete sudoku boards that are entered on the board (note: assuming they are solvable). It can be solved in a visulizational manner or just by providing the solution.
+This program can be used to play the game sudoku normally and solve any incomplete sudoku boards that are entered on the board (note: assuming they are solvable). 
+It can be solved in a visulizational manner or just by providing the solution.
