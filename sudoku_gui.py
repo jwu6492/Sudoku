@@ -112,7 +112,7 @@ class Grid:
                 self.squares[i][j].draw(self.window)
     
     def solve(self):
-        #solves the board
+        #solves the board to verification
         pos = [0,0]
         if not find_empty_space(self.model, pos):
             return True
@@ -126,6 +126,26 @@ class Grid:
                 self.model[row][col] = 0
         #no solution
         return False
+
+    def show_solution(self):
+        #solves the board to display
+        pos = [0,0]
+        if not find_empty_space(self.model, pos):
+            return True
+        row = pos[0]
+        col = pos[1]
+        for num in range(1, 10):
+            if valid(self.model, row, col, num):
+                self.model[row][col] = num
+                self.squares[row][col].set_val(num)
+                self.update_model()
+                if self.show_solution():
+                    return True
+                self.model[row][col] = 0
+                self.squares[row][col].set_val(0)
+                self.update_model()
+        #no solution
+        return False    
 
     def visualize_solve(self):
         #shows the visualization of the backtracking algorithm that solves the sudoku puzzle
@@ -208,19 +228,27 @@ class Square:
         else:
             pygame.draw.rect(window, (255, 0, 0), (x, y, gap, gap), 3)
 
-def draw_window(window, board, time, wrong, rect):
+def draw_window(window, board, time, wrong, clear_rect, solve_rect, solution_rect):
     window.fill((255,255,255))
     text = pygame.font.SysFont('comicsans', size = 30)
     #drawing time
     time_text = text.render("Time: " + format_time(time), 1, (0,0,0))
-    window.blit(time_text, (540 - 130, 565))
+    window.blit(time_text, (540 - 115, 590))
     #drawing the X's for number of wrongs
     wrong_text = text.render("X " * wrong, 1, (255, 0, 0))
-    window.blit(wrong_text, (10, 565))
+    window.blit(wrong_text, (10, 590))
     #drawing clear button
     clear = text.render("CLEAR", 1, (0, 0, 0))
-    pygame.draw.rect(window, (128, 128, 128), rect, 0)
-    window.blit(clear, rect)
+    pygame.draw.rect(window, (128, 128, 128), clear_rect, 0)
+    window.blit(clear, clear_rect)
+    #drawing solve button
+    solve = text.render("SOLVE", 1, (0, 0, 0))
+    pygame.draw.rect(window, (39, 174, 96), solve_rect, 0)
+    window.blit(solve, solve_rect)
+    #drawing solution button
+    solution = text.render("SOLUTION", 1, (0, 0, 0))
+    pygame.draw.rect(window, (174, 214, 241), solution_rect, 0)
+    window.blit(solution, solution_rect)
     #drawing board
     board.draw()
 
@@ -263,13 +291,15 @@ def find_empty_space(board, pos):
     return False
 
 def main():
-    screen = pygame.display.set_mode((540,600))
+    screen = pygame.display.set_mode((575,625))
     pygame.display.set_caption("Sudoku")
-    board = Grid(9, 9, 540, 540, screen)
+    board = Grid(9, 9, 575, 575, screen)
     run = True
     start = time.time()
     wrong = 0
-    button = pygame.Rect(315, 565, 70, 20)
+    clear = pygame.Rect(345, 590, 70, 20)
+    solve = pygame.Rect(150, 590, 70, 20)
+    solution = pygame.Rect(229, 590, 107, 20)
     while run:
         playing_time = round(time.time() - start)
         for event in pygame.event.get():
@@ -297,8 +327,6 @@ def main():
                 if event.key == pygame.K_x:
                     board.clear()
                     key = None
-                if event.key == pygame.K_SPACE:
-                    board.visualize_solve()
                 if event.key == pygame.K_RETURN:
                     row = board.selected[0]
                     col = board.selected[1]
@@ -308,6 +336,9 @@ def main():
                         else:
                             print('Wrong')
                             wrong += 1
+                            if wrong > 7:
+                                board.show_solution()
+                                wrong = 0
                         key = None
                         if board.is_complete():
                             print('Game Over') #make game over screen
@@ -320,13 +351,24 @@ def main():
                     key = None
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
-                if button.collidepoint(mouse_pos):
+                if clear.collidepoint(mouse_pos):
                     board.clear_board()
+                    wrong = 0
+                    key = None
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if solution.collidepoint(mouse_pos):
+                    board.show_solution()
+                    key = None
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if solve.collidepoint(mouse_pos):
+                    board.visualize_solve()
                     key = None
         if board.selected and key != None:
             board.num_guess(key)
         
-        draw_window(screen, board, playing_time, wrong, button)
+        draw_window(screen, board, playing_time, wrong, clear, solve, solution)
         pygame.display.update()
 main()
 pygame.quit()
