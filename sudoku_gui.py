@@ -85,6 +85,7 @@ class Grid:
         for i in range(self.rows):
             for j in range(self.cols):
                 self.squares[i][j].set_val(0)
+                self.squares[i][j].set_temp(0)
 
     def is_complete(self):
         #checks if board is finished or not
@@ -235,8 +236,9 @@ def draw_window(window, board, time, wrong, clear_rect, solve_rect, solution_rec
     time_text = text.render("Time: " + format_time(time), 1, (0,0,0))
     window.blit(time_text, (540 - 115, 590))
     #drawing the X's for number of wrongs
-    wrong_text = text.render("X " * wrong, 1, (255, 0, 0))
-    window.blit(wrong_text, (10, 590))
+    if wrong > 0:
+        wrong_text = text.render("X " * wrong, 1, (255, 0, 0))
+        window.blit(wrong_text, (10, 590))
     #drawing clear button
     clear = text.render("CLEAR", 1, (0, 0, 0))
     pygame.draw.rect(window, (128, 128, 128), clear_rect, 0)
